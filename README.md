@@ -33,7 +33,7 @@ Install Wise as a [Composer] dependency:
 ```json
 {
     "require": {
-        "herrera-io/php-wise": "~1.0"
+        "herrera-io/wise": "~1.0"
     }
 }
 ```

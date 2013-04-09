@@ -27,7 +27,7 @@
     },
     "suggest": {
         "ext-dom": "For parsing XML files.",
-        "herrera/json": "For parsing JSON files.",
+        "herrera-io/json": "For parsing JSON files.",
         "symfony/yaml": "For parsing YAML files."
     },
     "autoload": {

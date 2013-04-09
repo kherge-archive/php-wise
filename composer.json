@@ -1,0 +1,47 @@
+{
+    "name": "herrera-io/wise",
+    "description": "Symfony Config for everyone else.",
+    "keywords": ["config"],
+    "homepage": "http://herrera-io.github.com/php-wise",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Kevin Herrera",
+            "email": "kevin@herrera.io",
+            "homepage": "http://kevin.herrera.io"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/herrera-io/php-wise/issues"
+    },
+    "require": {
+        "php": ">=5.3.3",
+        "symfony/config": "~2.2"
+    },
+    "require-dev": {
+        "herrera-io/json": "~1.0",
+        "herrera-io/phpunit-test-case": "1.*",
+        "mikey179/vfsStream": "1.1.0",
+        "phpunit/phpunit": "3.7.*",
+        "symfony/yaml": "~2.2"
+    },
+    "suggest": {
+        "ext-dom": "For parsing XML files.",
+        "herrera/json": "For parsing JSON files.",
+        "symfony/yaml": "For parsing YAML files."
+    },
+    "autoload": {
+        "psr-0": {
+            "Herrera\\Wise": "src/lib"
+        }
+    },
+    "config": {
+        "bin-dir": "bin",
+        "vendor-dir": "src/vendors"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.0-dev"
+        }
+    }
+}

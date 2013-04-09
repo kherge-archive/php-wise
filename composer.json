@@ -2,7 +2,7 @@
     "name": "herrera-io/wise",
     "description": "Symfony Config for everyone else.",
     "keywords": ["config"],
-    "homepage": "http://herrera-io.github.com/php-wise",
+    "homepage": "http://github.com/herrera-io/php-wise",
     "license": "MIT",
     "authors": [
         {

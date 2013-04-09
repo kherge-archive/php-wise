@@ -21,7 +21,6 @@
     "require-dev": {
         "herrera-io/json": "~1.0",
         "herrera-io/phpunit-test-case": "1.*",
-        "mikey179/vfsStream": "1.1.0",
         "phpunit/phpunit": "3.7.*",
         "symfony/yaml": "~2.2"
     },

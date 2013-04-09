@@ -81,26 +81,39 @@ abstract class AbstractFileLoader
         array_walk_recursive(
             $data,
             function (&$value) use (&$data) {
-                if (false == preg_match('/^%([^%]+)%$/', $value)) {
-                    return;
-                }
+                preg_match_all(
+                    '/%(?P<reference>[^%]+)%/',
+                    $value,
+                    $matches
+                );
 
-                $tree = explode('.', trim($value, '%'));
-                $ref =& $data;
+                if (false === empty($matches['reference'])) {
+                    foreach ($matches['reference'] as $reference) {
+                        $tree = explode('.', $reference);
+                        $ref =& $data;
 
-                foreach ($tree as $treeKey) {
-                    if (false === isset($ref[$treeKey])) {
-                        throw InvalidReferenceException::format(
-                            'The reference "%s" could not be resolved (failed at "%s").',
-                            $value,
-                            $treeKey
-                        );
+                        foreach ($tree as $branch) {
+                            if (false === isset($ref[$branch])) {
+                                throw InvalidReferenceException::format(
+                                    'The reference "%s" could not be resolved (failed at "%s").',
+                                    "%$reference%",
+                                    $branch
+                                );
+                            }
+
+                            $ref =& $ref[$branch];
+                        }
+
+                        if (false === is_scalar($ref)) {
+                            throw InvalidReferenceException::format(
+                                'The reference "%s" is not a scalar value.',
+                                "%$reference%"
+                            );
+                        }
+
+                        $value = str_replace("%$reference%", $ref, $value);
                     }
-
-                    $ref =& $ref[$treeKey];
                 }
-
-                $value = $ref;
             }
         );
 

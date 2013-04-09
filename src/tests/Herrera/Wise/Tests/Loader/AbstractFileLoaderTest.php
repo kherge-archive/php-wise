@@ -62,7 +62,8 @@ class AbstractFileLoaderTest extends TestCase
                     'imports' => array(
                         array('resource' => 'two.php')
                     ),
-                    'placeholder' => '%imported.value%'
+                    'placeholder' => '%imported.value%',
+                    'inline_placeholder' => 'rand: %imported.value%'
                 ),
                 true
             ) . ';'
@@ -88,6 +89,7 @@ class AbstractFileLoaderTest extends TestCase
                     )
                 ),
                 'placeholder' => $rand,
+                'inline_placeholder' => 'rand: ' . $rand,
                 'imported' => array(
                     'value' => $rand
                 )
@@ -105,6 +107,25 @@ class AbstractFileLoaderTest extends TestCase
         $this->loader->process(
             array(
                 'bad_reference' => '%test.reference%'
+            ),
+            'test.php'
+        );
+    }
+
+    /**
+     * @expectedException \Herrera\Wise\Exception\InvalidReferenceException
+     * @expectedExceptionMessage The reference "%test.reference%" is not a scalar value.
+     */
+    public function testProcessNonScalarReference()
+    {
+        $this->loader->process(
+            array(
+                'bad_reference' => '%test.reference%',
+                'test' => array(
+                    'reference' => array(
+                        'value' => 123
+                    )
+                )
             ),
             'test.php'
         );

@@ -4,9 +4,12 @@ namespace Herrera\Wise\Tests;
 
 use Herrera\PHPUnit\TestCase;
 use Herrera\Wise\Loader\PhpFileLoader;
+use Herrera\Wise\Processor\AbstractProcessor;
 use Herrera\Wise\Resource\ResourceCollector;
 use Herrera\Wise\Tests\Processor\TestProcessor;
 use Herrera\Wise\Wise;
+use Symfony\Component\Config\Definition\Builder\TreeBuilder;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\FileLocator;
 
 class WiseTest extends TestCase
@@ -191,7 +194,60 @@ PHP
         $this->assertEquals($expected, $this->wise->load('test.php', 'php'));
     }
 
+    public function testLoadWithBasicProcessor()
+    {
+        file_put_contents(
+            $this->dir . '/test.php',
+            <<<PHP
+<?php return array(
+    'root' => array(
+        'number' => 123
+    )
+);
+PHP
+        );
+
+        $this->setPropertyValue($this->wise, 'loader', $this->loader);
+        $this->setPropertyValue($this->wise, 'processor', new BasicProcessor());
+
+        $this->assertEquals(
+            array(
+                'enabled' => false,
+                'number' => 123
+            ),
+            $this->wise->load('test.php', 'php')
+        );
+    }
+
     public function testLoadNoProcessorSupported()
+    {
+        file_put_contents(
+            $this->dir . '/test.php',
+            <<<PHP
+<?php return array(
+    'root' => array(
+        'number' => 123
+    )
+);
+PHP
+        );
+
+        $this->setPropertyValue($this->wise, 'loader', $this->loader);
+        $this->setPropertyValue(
+            $this->wise,
+            'processor',
+            new NeverSupportdProcessor()
+        );
+
+        $this->setExpectedException(
+            'Herrera\\Wise\\Exception\\ProcessorException',
+            'The resource "test.php" (php) is not supported by the processor.'
+        );
+
+        $this->wise->load('test.php', 'php', true);
+    }
+
+    public function testLoadNoProcessorRegistered()
     {
         file_put_contents(
             $this->dir . '/test.php',
@@ -208,7 +264,7 @@ PHP
 
         $this->setExpectedException(
             'Herrera\\Wise\\Exception\\ProcessorException',
-            'The resource "test.php" (php) is not supported by the processor.'
+            'No processor registered to handle any resource.'
         );
 
         $this->wise->load('test.php', 'php', true);
@@ -264,6 +320,12 @@ PHP
         $this->wise->setProcessor($this->processor);
 
         $this->assertSame($this->processor, $this->wise->getProcessor());
+
+        $processor = new BasicProcessor();
+
+        $this->wise->setProcessor($processor);
+
+        $this->assertSame($processor, $this->wise->getProcessor());
     }
 
     protected function setUp()
@@ -277,5 +339,35 @@ PHP
         $this->wise = new Wise(true);
 
         $this->loader->setResourceCollector($this->collector);
+    }
+}
+
+class BasicProcessor implements ConfigurationInterface
+{
+    public function getConfigTreeBuilder()
+    {
+        $builder = new TreeBuilder();
+        $root = $builder->root('root');
+
+        $root->children()
+                 ->booleanNode('enabled')
+                     ->defaultFalse()
+                 ->end()
+                 ->integerNode('number')->end()
+             ->end();
+
+        return $builder;
+    }
+}
+
+class NeverSupportdProcessor extends AbstractProcessor
+{
+    public function getConfigTreeBuilder()
+    {
+    }
+
+    public function supports($resource, $type = null)
+    {
+        return false;
     }
 }

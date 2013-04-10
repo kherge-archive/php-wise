@@ -9,6 +9,8 @@ use Herrera\Wise\Processor\ProcessorInterface;
 use Herrera\Wise\Resource\ResourceAwareInterface;
 use Herrera\Wise\Resource\ResourceCollectorInterface;
 use Symfony\Component\Config\ConfigCache;
+use Symfony\Component\Config\Definition\ConfigurationInterface;
+use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderInterface;
@@ -201,18 +203,12 @@ class Wise
             $this->collector->clearResources();
         }
 
-        if ($this->processor && $this->processor->supports($resource, $type)) {
-            $data = $this->loader->load($resource, $type);
-            $data = $this->processor->process($data);
-        } elseif ($require) {
-            throw ProcessorException::format(
-                'The resource "%s"%s is not supported by the processor.',
-                is_string($resource) ? $resource : gettype($resource),
-                $type ? " ($type)" : ''
-            );
-        } else {
-            $data = $this->loader->load($resource, $type);
-        }
+        $data = $this->process(
+            $this->loader->load($resource, $type),
+            $resource,
+            $type,
+            $require
+        );
 
         if (isset($cache)) {
             $cache->write(
@@ -266,10 +262,52 @@ class Wise
     /**
      * Sets a configuration processor.
      *
-     * @param ProcessorInterface $processor A processor.
+     * @param ConfigurationInterface $processor A processor.
      */
-    public function setProcessor(ProcessorInterface $processor)
+    public function setProcessor(ConfigurationInterface $processor)
     {
         $this->processor = $processor;
+    }
+
+    /**
+     * Processes the configuration definition.
+     *
+     * @param array   $data     The configuration data.
+     * @param mixed   $resource A resource.
+     * @param string  $type     The resource type.
+     * @param boolean $require  Require processing?
+     *
+     * @return array The processed configuration data.
+     *
+     * @throws ProcessorException If the processor could not be used and it is
+     *                            require that one be used.
+     */
+    private function process(array $data, $resource, $type, $require)
+    {
+        if ($this->processor) {
+            if ($this->processor instanceof ProcessorInterface) {
+                if ($this->processor->supports($resource, $type)) {
+                    $data = $this->processor->process($data);
+                } elseif ($require) {
+                    throw ProcessorException::format(
+                        'The resource "%s"%s is not supported by the processor.',
+                        is_string($resource) ? $resource : gettype($resource),
+                        $type ? " ($type)" : ''
+                    );
+                }
+            } else {
+                $processor = new Processor();
+                $data = $processor->processConfiguration(
+                    $this->processor,
+                    $data
+                );
+            }
+        } elseif ($require) {
+            throw ProcessorException::format(
+                'No processor registered to handle any resource.'
+            );
+        }
+
+        return $data;
     }
 }

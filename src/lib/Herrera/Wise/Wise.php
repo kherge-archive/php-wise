@@ -8,6 +8,7 @@ use Herrera\Wise\Exception\ProcessorException;
 use Herrera\Wise\Processor\ProcessorInterface;
 use Herrera\Wise\Resource\ResourceAwareInterface;
 use Herrera\Wise\Resource\ResourceCollectorInterface;
+use Herrera\Wise\Util\ArrayUtil;
 use Symfony\Component\Config\ConfigCache;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
 use Symfony\Component\Config\Definition\Processor;
@@ -235,6 +236,20 @@ class Wise
         }
 
         return $data;
+    }
+
+    /**
+     * Loads the configuration data from a resource and returns it flattened.
+     *
+     * @param mixed   $resource A resource.
+     * @param string  $type     The resource type.
+     * @param boolean $require  Require processing?
+     *
+     * @return array The data.
+     */
+    public function loadFlat($resource, $type = null, $require = false)
+    {
+        return ArrayUtil::flatten($this->load($resource, $type, $require));
     }
 
     /**

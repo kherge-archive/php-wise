@@ -208,6 +208,32 @@ PHP
         $this->assertEquals($expected, $this->wise->load('test.php', 'php'));
     }
 
+    /**
+     * @depends testLoad
+     */
+    public function testLoadFlat()
+    {
+        file_put_contents(
+            $this->dir . '/test.php',
+            <<<PHP
+<?php return array(
+    'root' => array(
+        'number' => 123
+    )
+);
+PHP
+        );
+
+        $this->setPropertyValue($this->wise, 'loader', $this->loader);
+
+        $this->assertEquals(
+            array(
+                'root.number' => 123
+            ),
+            $this->wise->loadFlat('test.php', 'php')
+        );
+    }
+
     public function testLoadWithBasicProcessor()
     {
         file_put_contents(

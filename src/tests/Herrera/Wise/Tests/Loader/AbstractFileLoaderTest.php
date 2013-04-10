@@ -163,6 +163,34 @@ class AbstractFileLoaderTest extends TestCase
     }
 
     /**
+     * @expectedException \Herrera\Wise\Exception\InvalidReferenceException
+     * @expectedExceptionMessage The reference "%a.b.c.d%" could not be resolved (failed at "a").
+     */
+    public function testResolveReferenceInvalid()
+    {
+        $this->loader->resolveReference('a.b.c.d', array());
+    }
+
+    public function testResolveReference()
+    {
+        $this->assertEquals(
+            123,
+            $this->loader->resolveReference(
+                'a.b.c.d',
+                array(
+                    'a' => array(
+                        'b' => array(
+                            'c' => array(
+                                'd' => 123
+                            )
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    /**
      * @depends testGetResourceCollector
      */
     public function testSetResourceCollector()

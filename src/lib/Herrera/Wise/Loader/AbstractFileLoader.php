@@ -97,10 +97,11 @@ abstract class AbstractFileLoader
         }
 
         $global = $this->wise ? $this->wise->getGlobalParameters() : array();
+        $_this = $this;
 
         array_walk_recursive(
             $data,
-            function (&$value) use (&$data, $global) {
+            function (&$value) use (&$data, $global, $_this) {
                 preg_match_all(
                     '/%(?P<reference>[^%]+)%/',
                     $value,
@@ -110,13 +111,13 @@ abstract class AbstractFileLoader
                 if (false === empty($matches['reference'])) {
                     foreach ($matches['reference'] as $reference) {
                         try {
-                            $ref = $this->resolveReference($reference, $data);
+                            $ref = $_this->resolveReference($reference, $data);
                         } catch (InvalidReferenceException $exception) {
                             if (empty($global)) {
                                 throw $exception;
                             }
 
-                            $ref = $this->resolveReference($reference, $global);
+                            $ref = $_this->resolveReference($reference, $global);
                         }
 
                         if (false === is_scalar($ref)) {
@@ -137,6 +138,34 @@ abstract class AbstractFileLoader
         );
 
         return $data;
+    }
+
+    /**
+     * Resolves the reference and returns its value.
+     *
+     * @param string $reference A reference.
+     * @param array  $values    A list of values.
+     *
+     * @return mixed The referenced value.
+     *
+     * @throws InvalidReferenceException If the reference is not valid.
+     */
+    public function resolveReference($reference, array $values)
+    {
+        foreach (explode('.', $reference) as $leaf) {
+            if ((false === is_array($values))
+                || (false === array_key_exists($leaf, $values))) {
+                throw InvalidReferenceException::format(
+                    'The reference "%s" could not be resolved (failed at "%s").',
+                    "%$reference%",
+                    $leaf
+                );
+            }
+
+            $values = $values[$leaf];
+        }
+
+        return $values;
     }
 
     /**
@@ -163,32 +192,4 @@ abstract class AbstractFileLoader
      * @return array The parsed data.
      */
     abstract protected function doLoad($file);
-
-    /**
-     * Resolves the reference and returns its value.
-     *
-     * @param string $reference A reference.
-     * @param array  $values    A list of values.
-     *
-     * @return mixed The referenced value.
-     *
-     * @throws InvalidReferenceException If the reference is not valid.
-     */
-    private function resolveReference($reference, array $values)
-    {
-        foreach (explode('.', $reference) as $leaf) {
-            if ((false === is_array($values))
-                || (false === array_key_exists($leaf, $values))) {
-                throw InvalidReferenceException::format(
-                    'The reference "%s" could not be resolved (failed at "%s").',
-                    "%$reference%",
-                    $leaf
-                );
-            }
-
-            $values = $values[$leaf];
-        }
-
-        return $values;
-    }
 }

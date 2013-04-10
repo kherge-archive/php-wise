@@ -6,6 +6,7 @@ use Herrera\PHPUnit\TestCase;
 use Herrera\Wise\Loader\AbstractFileLoader;
 use Herrera\Wise\Resource\ResourceCollector;
 use Herrera\Wise\Tests\Loader\ExampleFileLoader;
+use Herrera\Wise\Wise;
 use Symfony\Component\Config\FileLocator;
 
 class AbstractFileLoaderTest extends TestCase
@@ -32,6 +33,15 @@ class AbstractFileLoaderTest extends TestCase
         );
     }
 
+    public function testGetWise()
+    {
+        $wise = new Wise();
+
+        $this->setPropertyValue($this->loader, 'wise', $wise);
+
+        $this->assertSame($wise, $this->loader->getWise());
+    }
+
     public function testLoad()
     {
         $data = array('rand' => rand());
@@ -55,6 +65,17 @@ class AbstractFileLoaderTest extends TestCase
 
     public function testProcess()
     {
+        $wise = new Wise();
+        $wise->setGlobalParameters(
+            array(
+                'global' => array(
+                    'value' => 999
+                )
+            )
+        );
+
+        $this->setPropertyValue($this->loader, 'wise', $wise);
+
         file_put_contents(
             "{$this->dir}/one.php",
             '<?php return ' . var_export(
@@ -62,6 +83,7 @@ class AbstractFileLoaderTest extends TestCase
                     'imports' => array(
                         array('resource' => 'two.php')
                     ),
+                    'global' => '%global.value%',
                     'placeholder' => '%imported.list%',
                     'inline_placeholder' => 'rand: %imported.value%'
                 ),
@@ -91,6 +113,7 @@ class AbstractFileLoaderTest extends TestCase
                         'resource' => 'two.php'
                     )
                 ),
+                'global' => 999,
                 'placeholder' => array(
                     'value' => 123
                 ),
@@ -150,6 +173,18 @@ class AbstractFileLoaderTest extends TestCase
             $this->collector,
             $this->loader->getResourceCollector()
         );
+    }
+
+    /**
+     * @depends testGetWise
+     */
+    public function testSetWise()
+    {
+        $wise = new Wise();
+
+        $this->loader->setWise($wise);
+
+        $this->assertSame($wise, $this->loader->getWise());
     }
 
     protected function setUp()

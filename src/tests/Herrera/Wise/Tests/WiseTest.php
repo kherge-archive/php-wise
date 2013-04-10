@@ -92,6 +92,20 @@ PHP
         $this->assertSame($this->collector, $this->wise->getCollector());
     }
 
+    public function testGetGlobalParameters()
+    {
+        $this->setPropertyValue(
+            $this->wise,
+            'parameters',
+            array('value' => 123)
+        );
+
+        $this->assertEquals(
+            array('value' => 123),
+            $this->wise->getGlobalParameters()
+        );
+    }
+
     public function testGetLoader()
     {
         $this->setPropertyValue($this->wise, 'loader', $this->loader);
@@ -293,6 +307,19 @@ PHP
         $this->assertSame(
             $this->collector,
             $this->loader->getResourceCollector()
+        );
+    }
+
+    /**
+     * @depends testGetGlobalParameters
+     */
+    public function testSetGlobalParameters()
+    {
+        $this->wise->setGlobalParameters(array('value' => 123));
+
+        $this->assertEquals(
+            array('value' => 123),
+            $this->wise->getGlobalParameters()
         );
     }
 

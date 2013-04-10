@@ -52,6 +52,13 @@ class Wise
     private $loader;
 
     /**
+     * The list of global parameters.
+     *
+     * @var array
+     */
+    private $parameters = array();
+
+    /**
      * The configuration processor.
      *
      * @var ProcessorInterface
@@ -86,21 +93,21 @@ class Wise
         }
 
         $locator = new FileLocator($paths);
+        $loaders = array(
+            new Loader\IniFileLoader($locator),
+            new Loader\JsonFileLoader($locator),
+            new Loader\PhpFileLoader($locator),
+            new Loader\XmlFileLoader($locator),
+            new Loader\YamlFileLoader($locator)
+        );
+
+        foreach ($loaders as $loader) {
+            /** @var $loader WiseAwareInterface */
+            $loader->setWise($wise);
+        }
 
         $wise->setCollector(new Resource\ResourceCollector());
-        $wise->setLoader(
-            new DelegatingLoader(
-                new LoaderResolver(
-                    array(
-                        new Loader\IniFileLoader($locator),
-                        new Loader\JsonFileLoader($locator),
-                        new Loader\PhpFileLoader($locator),
-                        new Loader\XmlFileLoader($locator),
-                        new Loader\YamlFileLoader($locator)
-                    )
-                )
-            )
-        );
+        $wise->setLoader(new DelegatingLoader(new LoaderResolver($loaders)));
 
         return $wise;
     }
@@ -123,6 +130,16 @@ class Wise
     public function getCollector()
     {
         return $this->collector;
+    }
+
+    /**
+     * Returns the list of global parameters.
+     *
+     * @return array The parameters.
+     */
+    public function getGlobalParameters()
+    {
+        return $this->parameters;
     }
 
     /**
@@ -243,6 +260,16 @@ class Wise
             && ($this->loader instanceof ResourceAwareInterface)) {
             $this->loader->setResourceCollector($collector);
         }
+    }
+
+    /**
+     * Sets a list of global parameters.
+     *
+     * @param array $parameters The parameters.
+     */
+    public function setGlobalParameters(array $parameters)
+    {
+        $this->parameters = $parameters;
     }
 
     /**

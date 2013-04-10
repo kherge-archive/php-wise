@@ -5,6 +5,8 @@ namespace Herrera\Wise\Loader;
 use Herrera\Wise\Exception\InvalidReferenceException;
 use Herrera\Wise\Resource\ResourceAwareInterface;
 use Herrera\Wise\Resource\ResourceCollectorInterface;
+use Herrera\Wise\Wise;
+use Herrera\Wise\WiseAwareInterface;
 use Symfony\Component\Config\Loader\FileLoader;
 use Symfony\Component\Config\Resource\FileResource;
 
@@ -15,7 +17,8 @@ use Symfony\Component\Config\Resource\FileResource;
  */
 abstract class AbstractFileLoader
        extends FileLoader
-    implements ResourceAwareInterface
+    implements ResourceAwareInterface,
+               WiseAwareInterface
 {
     /**
      * The resource collector.
@@ -25,11 +28,26 @@ abstract class AbstractFileLoader
     private $collector;
 
     /**
+     * The Wise instance.
+     *
+     * @var Wise
+     */
+    private $wise;
+
+    /**
      * {@inheritDoc}
      */
     public function getResourceCollector()
     {
         return $this->collector;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getWise()
+    {
+        return $this->wise;
     }
 
     /**
@@ -78,9 +96,11 @@ abstract class AbstractFileLoader
             }
         }
 
+        $global = $this->wise ? $this->wise->getGlobalParameters() : array();
+
         array_walk_recursive(
             $data,
-            function (&$value) use (&$data) {
+            function (&$value) use (&$data, $global) {
                 preg_match_all(
                     '/%(?P<reference>[^%]+)%/',
                     $value,
@@ -89,23 +109,18 @@ abstract class AbstractFileLoader
 
                 if (false === empty($matches['reference'])) {
                     foreach ($matches['reference'] as $reference) {
-                        $tree = explode('.', $reference);
-                        $ref =& $data;
-
-                        foreach ($tree as $branch) {
-                            if (false === isset($ref[$branch])) {
-                                throw InvalidReferenceException::format(
-                                    'The reference "%s" could not be resolved (failed at "%s").',
-                                    "%$reference%",
-                                    $branch
-                                );
+                        try {
+                            $ref = $this->resolveReference($reference, $data);
+                        } catch (InvalidReferenceException $exception) {
+                            if (empty($global)) {
+                                throw $exception;
                             }
 
-                            $ref =& $ref[$branch];
+                            $ref = $this->resolveReference($reference, $global);
                         }
 
                         if (false === is_scalar($ref)) {
-                            if (false == preg_match('/^%([^%]+)%$/', $value)) {
+                            if (false == preg_match('/^%(?:[^%]+)%$/', $value)) {
                                 throw InvalidReferenceException::format(
                                     'The non-scalar reference "%s" cannot be used inline.',
                                     "%$reference%"
@@ -133,6 +148,14 @@ abstract class AbstractFileLoader
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function setWise(Wise $wise)
+    {
+        $this->wise = $wise;
+    }
+
+    /**
      * Returns the parsed data of the file.
      *
      * @param string $file The file path.
@@ -140,4 +163,32 @@ abstract class AbstractFileLoader
      * @return array The parsed data.
      */
     abstract protected function doLoad($file);
+
+    /**
+     * Resolves the reference and returns its value.
+     *
+     * @param string $reference A reference.
+     * @param array  $values    A list of values.
+     *
+     * @return mixed The referenced value.
+     *
+     * @throws InvalidReferenceException If the reference is not valid.
+     */
+    private function resolveReference($reference, array $values)
+    {
+        foreach (explode('.', $reference) as $leaf) {
+            if ((false === is_array($values))
+                || (false === array_key_exists($leaf, $values))) {
+                throw InvalidReferenceException::format(
+                    'The reference "%s" could not be resolved (failed at "%s").',
+                    "%$reference%",
+                    $leaf
+                );
+            }
+
+            $values = $values[$leaf];
+        }
+
+        return $values;
+    }
 }

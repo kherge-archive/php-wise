@@ -105,13 +105,17 @@ abstract class AbstractFileLoader
                         }
 
                         if (false === is_scalar($ref)) {
-                            throw InvalidReferenceException::format(
-                                'The reference "%s" is not a scalar value.',
-                                "%$reference%"
-                            );
-                        }
+                            if (false == preg_match('/^%([^%]+)%$/', $value)) {
+                                throw InvalidReferenceException::format(
+                                    'The non-scalar reference "%s" cannot be used inline.',
+                                    "%$reference%"
+                                );
+                            }
 
-                        $value = str_replace("%$reference%", $ref, $value);
+                            $value = $ref;
+                        } else {
+                            $value = str_replace("%$reference%", $ref, $value);
+                        }
                     }
                 }
             }

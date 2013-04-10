@@ -62,7 +62,7 @@ class AbstractFileLoaderTest extends TestCase
                     'imports' => array(
                         array('resource' => 'two.php')
                     ),
-                    'placeholder' => '%imported.value%',
+                    'placeholder' => '%imported.list%',
                     'inline_placeholder' => 'rand: %imported.value%'
                 ),
                 true
@@ -74,6 +74,9 @@ class AbstractFileLoaderTest extends TestCase
             '<?php return ' . var_export(
                 array(
                     'imported' => array(
+                        'list' => array(
+                            'value' => 123
+                        ),
                         'value' => $rand = rand()
                     )
                 ),
@@ -88,9 +91,14 @@ class AbstractFileLoaderTest extends TestCase
                         'resource' => 'two.php'
                     )
                 ),
-                'placeholder' => $rand,
+                'placeholder' => array(
+                    'value' => 123
+                ),
                 'inline_placeholder' => 'rand: ' . $rand,
                 'imported' => array(
+                    'list' => array(
+                        'value' => 123
+                    ),
                     'value' => $rand
                 )
             ),
@@ -114,13 +122,13 @@ class AbstractFileLoaderTest extends TestCase
 
     /**
      * @expectedException \Herrera\Wise\Exception\InvalidReferenceException
-     * @expectedExceptionMessage The reference "%test.reference%" is not a scalar value.
+     * @expectedExceptionMessage The non-scalar reference "%test.reference%" cannot be used inline.
      */
     public function testProcessNonScalarReference()
     {
         $this->loader->process(
             array(
-                'bad_reference' => '%test.reference%',
+                'bad_reference' => 'bad: %test.reference%',
                 'test' => array(
                     'reference' => array(
                         'value' => 123

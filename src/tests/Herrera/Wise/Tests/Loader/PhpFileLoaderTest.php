@@ -23,7 +23,9 @@ class PhpFileLoaderTest extends TestCase
 
     public function testDoLoad()
     {
-        file_put_contents("{$this->dir}/test.php", <<<DATA
+        file_put_contents(
+            "{$this->dir}/test.php",
+            <<<DATA
 <?php return array(
     'imports' => array(
         array('resource' => 'import.php')
@@ -36,7 +38,9 @@ class PhpFileLoaderTest extends TestCase
 DATA
         );
 
-        file_put_contents("{$this->dir}/import.php", <<<DATA
+        file_put_contents(
+            "{$this->dir}/import.php",
+            <<<DATA
 <?php return array(
     'imported' => array(
         'value' => 'imported value'

@@ -15,10 +15,7 @@ use Symfony\Component\Config\Resource\FileResource;
  *
  * @author Kevin Herrera <kevin@herrera.io>
  */
-abstract class AbstractFileLoader
-       extends FileLoader
-    implements ResourceAwareInterface,
-               WiseAwareInterface
+abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInterface, WiseAwareInterface
 {
     /**
      * The resource collector.
@@ -84,15 +81,14 @@ abstract class AbstractFileLoader
             foreach ($data['imports'] as $import) {
                 $this->setCurrentDir($dir);
 
-                $data = array_replace_recursive($data, $this->import(
-                    $import['resource'],
-                    null,
-                    // @codeCoverageIgnoreStart
-                    isset($import['ignore_errors'])
-                        ? (bool) $import['ignore_errors']
-                        : false
-                    // @codeCoverageIgnoreEnd
-                ));
+                $data = array_replace_recursive(
+                    $data,
+                    $this->import(
+                        $import['resource'],
+                        null,
+                        isset($import['ignore_errors']) ? (bool) $import['ignore_errors'] : false
+                    )
+                );
             }
         }
 

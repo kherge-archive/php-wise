@@ -23,7 +23,9 @@ class YamlFileLoaderTest extends TestCase
 
     public function testDoLoad()
     {
-        file_put_contents("{$this->dir}/test.yml", <<<DATA
+        file_put_contents(
+            "{$this->dir}/test.yml",
+            <<<DATA
 imports:
     - { resource: import.yml }
 
@@ -33,7 +35,9 @@ root:
 DATA
         );
 
-        file_put_contents("{$this->dir}/import.yml", <<<DATA
+        file_put_contents(
+            "{$this->dir}/import.yml",
+            <<<DATA
 imported:
     value: imported value
 DATA

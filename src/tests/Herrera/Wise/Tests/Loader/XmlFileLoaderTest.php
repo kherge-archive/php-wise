@@ -23,7 +23,9 @@ class XmlFileLoaderTest extends TestCase
 
     public function testDoLoad()
     {
-        file_put_contents("{$this->dir}/test.xml", <<<DATA
+        file_put_contents(
+            "{$this->dir}/test.xml",
+            <<<DATA
 <array>
   <array key="imports">
     <array>
@@ -40,7 +42,9 @@ class XmlFileLoaderTest extends TestCase
 DATA
         );
 
-        file_put_contents("{$this->dir}/import.xml", <<<DATA
+        file_put_contents(
+            "{$this->dir}/import.xml",
+            <<<DATA
 <array>
   <array key="imported">
     <str key="value">imported value</str>

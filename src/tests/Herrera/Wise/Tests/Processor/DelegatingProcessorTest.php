@@ -52,9 +52,7 @@ class DelegatingProcessorTest extends TestCase
     protected function setUp()
     {
         $this->processor = new DelegatingProcessor(
-            new ProcessorResolver(array(
-                new ExampleProcessor()
-            ))
+            new ProcessorResolver(array(new ExampleProcessor()))
         );
     }
 }

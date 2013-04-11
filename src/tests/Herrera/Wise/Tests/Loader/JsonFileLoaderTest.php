@@ -23,7 +23,9 @@ class JsonFileLoaderTest extends TestCase
 
     public function testDoLoad()
     {
-        file_put_contents("{$this->dir}/test.json", <<<DATA
+        file_put_contents(
+            "{$this->dir}/test.json",
+            <<<DATA
 {
     "imports": [
         { "resource": "import.json" }
@@ -39,7 +41,9 @@ class JsonFileLoaderTest extends TestCase
 DATA
         );
 
-        file_put_contents("{$this->dir}/import.json", <<<DATA
+        file_put_contents(
+            "{$this->dir}/import.json",
+            <<<DATA
 {
     "imported": {
         "value": "imported value"

@@ -23,7 +23,9 @@ class IniFileLoaderTest extends TestCase
 
     public function testDoLoad()
     {
-        file_put_contents("{$this->dir}/test.ini", <<<DATA
+        file_put_contents(
+            "{$this->dir}/test.ini",
+            <<<DATA
 [imports]
 0[resource] = "import.ini"
 
@@ -33,7 +35,9 @@ imported = "%imported.value%"
 DATA
         );
 
-        file_put_contents("{$this->dir}/import.ini", <<<DATA
+        file_put_contents(
+            "{$this->dir}/import.ini",
+            <<<DATA
 [imported]
 value = "imported value"
 DATA

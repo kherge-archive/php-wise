@@ -8,6 +8,7 @@ class ExampleFileLoader extends AbstractFileLoader
 {
     public function doLoad($file)
     {
+        /** @noinspection PhpIncludeInspection */
         return require $file;
     }
 

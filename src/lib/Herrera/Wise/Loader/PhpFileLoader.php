@@ -24,6 +24,7 @@ class PhpFileLoader extends AbstractFileLoader
      */
     protected function doLoad($file)
     {
+        /** @noinspection PhpIncludeInspection */
         return require $file;
     }
 }

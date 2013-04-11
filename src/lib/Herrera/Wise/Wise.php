@@ -205,14 +205,12 @@ class Wise
             && (false === strpos("\n", $resource))
             && (false === strpos("\r", $resource))) {
             $cache = new ConfigCache(
-                $this->cacheDir
-                    . DIRECTORY_SEPARATOR
-                    . basename($resource)
-                    . '.cache',
+                $this->cacheDir . DIRECTORY_SEPARATOR . basename($resource) . '.cache',
                 $this->debug
             );
 
             if ($cache->isFresh()) {
+                /** @noinspection PhpIncludeInspection */
                 return require $cache;
             }
         }

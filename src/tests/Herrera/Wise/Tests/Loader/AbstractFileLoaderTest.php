@@ -63,6 +63,27 @@ class AbstractFileLoaderTest extends TestCase
         );
     }
 
+    /**
+     * @expectedException \Herrera\Wise\Exception\ImportException
+     * @expectedExceptionMessage The "imports" value is not valid in "test.file".
+     */
+    public function testProcessInvalidImports()
+    {
+        $this->loader->process(array('imports' => 123), 'test.file');
+    }
+
+    /**
+     * @expectedException \Herrera\Wise\Exception\ImportException
+     * @expectedExceptionMessage A resource was not defined for an import in "test.file".
+     */
+    public function testProcessInvalidImport()
+    {
+        $this->loader->process(
+            array('imports' => array(array())),
+            'test.file'
+        );
+    }
+
     public function testProcess()
     {
         $wise = new Wise();

@@ -2,6 +2,7 @@
 
 namespace Herrera\Wise\Loader;
 
+use Herrera\Wise\Exception\ImportException;
 use Herrera\Wise\Exception\InvalidReferenceException;
 use Herrera\Wise\Resource\ResourceAwareInterface;
 use Herrera\Wise\Resource\ResourceCollectorInterface;
@@ -71,14 +72,29 @@ abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInt
      *
      * @return array The processed data.
      *
+     * @throws ImportException           If "imports" is invalid.
      * @throws InvalidReferenceException If an invalid reference is used.
      */
     public function process(array $data, $file)
     {
         if (isset($data['imports'])) {
+            if (false === is_array($data['imports'])) {
+                throw ImportException::format(
+                    'The "imports" value is not valid in "%s".',
+                    $file
+                );
+            }
+
             $dir = dirname($file);
 
             foreach ($data['imports'] as $import) {
+                if (false === isset($import['resource'])) {
+                    throw ImportException::format(
+                        'A resource was not defined for an import in "%s".',
+                        $file
+                    );
+                }
+
                 $this->setCurrentDir($dir);
 
                 $data = array_replace_recursive(

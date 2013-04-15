@@ -87,7 +87,15 @@ abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInt
 
             $dir = dirname($file);
 
-            foreach ($data['imports'] as $import) {
+            foreach ($data['imports'] as $i => $import) {
+                if (false === is_array($import)) {
+                    throw ImportException::format(
+                        'One of the "imports" values (#%d) is not valid in "%s".',
+                        $i,
+                        $file
+                    );
+                }
+
                 if (false === isset($import['resource'])) {
                     throw ImportException::format(
                         'A resource was not defined for an import in "%s".',

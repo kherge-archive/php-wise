@@ -11,7 +11,7 @@ component, with the difference being added support for Wise features.
 
 # File Based Loader <a id="FileBasedLoader"></a>
 
-To create a file-based loader, you need to extends the `AbstractFileLoader`
+To create a file-based loader, you need to extend the `AbstractFileLoader`
 class. The `AbstractFileLoader` class enabled support for global parameters
 and importing from other configuration resources. The following is an example
 simple loader for CSV files:
@@ -54,9 +54,10 @@ For resources that are not files, you will need to implement these interfaces:
 - `Herrera\Wise\WiseAwareInterface` - For global parameters support
 - `Symfony\Component\Config\Loader\LoaderInterface` - For basic loading
 
-By implementing the first two interfaces, you merely indicate that your class
-can support the setting of a resource collector and an instance of `Wise`. It
-will be up to your class to make use of it when it is automatically set by the
-`Wise` instance when you set it as the loader to use.
+Implementing the first two interfaces flags your class as having support for
+caching and global parameters. Your class will actually need to make use of
+the resource collector and `Wise` instance, which will be set when your class
+is set as the `Wise` loader. In the `AbstractFileLoader` class provided by the
+library, this is already handled for you.
 
 [Config]: http://symfony.com/doc/current/components/config/resources.html#resource-loaders

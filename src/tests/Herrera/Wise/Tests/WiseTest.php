@@ -362,6 +362,10 @@ PHP
             $this->collector,
             $this->loader->getResourceCollector()
         );
+        $this->assertSame(
+            $this->wise,
+            $this->loader->getWise()
+        );
     }
 
     /**

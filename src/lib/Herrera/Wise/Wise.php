@@ -5,6 +5,7 @@ namespace Herrera\Wise;
 use Herrera\Wise\Exception\LoaderException;
 use Herrera\Wise\Exception\LogicException;
 use Herrera\Wise\Exception\ProcessorException;
+use Herrera\Wise\Loader\LoaderResolver;
 use Herrera\Wise\Processor\ProcessorInterface;
 use Herrera\Wise\Resource\ResourceAwareInterface;
 use Herrera\Wise\Resource\ResourceCollectorInterface;
@@ -15,7 +16,6 @@ use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\Config\Loader\DelegatingLoader;
 use Symfony\Component\Config\Loader\LoaderInterface;
-use Symfony\Component\Config\Loader\LoaderResolver;
 
 /**
  * Manages access to the configuration data.
@@ -94,21 +94,21 @@ class Wise
         }
 
         $locator = new FileLocator($paths);
-        $loaders = array(
-            new Loader\IniFileLoader($locator),
-            new Loader\JsonFileLoader($locator),
-            new Loader\PhpFileLoader($locator),
-            new Loader\XmlFileLoader($locator),
-            new Loader\YamlFileLoader($locator)
-        );
-
-        foreach ($loaders as $loader) {
-            /** @var $loader WiseAwareInterface */
-            $loader->setWise($wise);
-        }
 
         $wise->setCollector(new Resource\ResourceCollector());
-        $wise->setLoader(new DelegatingLoader(new LoaderResolver($loaders)));
+        $wise->setLoader(
+            new DelegatingLoader(
+                new LoaderResolver(
+                    array(
+                        new Loader\IniFileLoader($locator),
+                        new Loader\JsonFileLoader($locator),
+                        new Loader\PhpFileLoader($locator),
+                        new Loader\XmlFileLoader($locator),
+                        new Loader\YamlFileLoader($locator),
+                    )
+                )
+            )
+        );
 
         return $wise;
     }
@@ -296,6 +296,10 @@ class Wise
 
         if ($this->collector && ($loader instanceof ResourceAwareInterface)) {
             $loader->setResourceCollector($this->collector);
+        }
+
+        if ($loader instanceof WiseAwareInterface) {
+            $loader->setWise($this);
         }
     }
 

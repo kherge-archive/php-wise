@@ -73,6 +73,21 @@ PHP
         $this->assertEquals($expected, $wise->load('test.php', 'php'));
         $this->assertFileExists($this->cache . '/test.php.cache');
         $this->assertFileExists($this->cache . '/test.php.cache.meta');
+
+        /** @var $delegator \Symfony\Component\Config\Loader\DelegatingLoader */
+        $delegator = $this->getPropertyValue($wise, 'loader');
+
+        /** @var $loaders \Herrera\Wise\Loader\LoaderResolver */
+        $resolver = $delegator->getResolver();
+
+        /** @var $loader \Herrera\Wise\Loader\AbstractFileLoader */
+        foreach ($resolver->getLoaders() as $loader) {
+            $this->assertSame(
+                $wise->getCollector(),
+                $loader->getResourceCollector()
+            );
+            $this->assertSame($wise, $loader->getWise());
+        }
     }
 
     public function testGetCacheDir()

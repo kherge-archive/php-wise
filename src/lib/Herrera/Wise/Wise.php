@@ -94,21 +94,21 @@ class Wise
         }
 
         $locator = new FileLocator($paths);
-
-        $wise->setCollector(new Resource\ResourceCollector());
-        $wise->setLoader(
-            new DelegatingLoader(
-                new LoaderResolver(
-                    array(
-                        new Loader\IniFileLoader($locator),
-                        new Loader\JsonFileLoader($locator),
-                        new Loader\PhpFileLoader($locator),
-                        new Loader\XmlFileLoader($locator),
-                        new Loader\YamlFileLoader($locator),
-                    )
-                )
+        $resolver = new LoaderResolver(
+            array(
+                new Loader\IniFileLoader($locator),
+                new Loader\JsonFileLoader($locator),
+                new Loader\PhpFileLoader($locator),
+                new Loader\XmlFileLoader($locator),
+                new Loader\YamlFileLoader($locator),
             )
         );
+
+        $wise->setCollector(new Resource\ResourceCollector());
+        $wise->setLoader(new DelegatingLoader($resolver));
+
+        $resolver->setResourceCollector($wise->getCollector());
+        $resolver->setWise($wise);
 
         return $wise;
     }

@@ -91,7 +91,7 @@ $wise->setCollector(new Herrera\Wise\Resource\ResourceCollector());
 
 #### Set the Loader
 
-Wise comes with bundled with its own collection of file loaders.
+Wise comes bundled with its own collection of file loaders.
 
 - `Herrera\Loader\Wise\IniFileLoader`
 - `Herrera\Loader\Wise\JsonFileLoader`
@@ -140,7 +140,7 @@ $wise->setLoader(
 ```
 
 > You may use the `Symfony\Component\Config\Loader\LoaderResolver` class, but
-> you will lose support for caching and global parameters. The `LoaderResolver`
+> you may lose support for caching and global parameters. The `LoaderResolver`
 > class included with Wise will automatically set the `Wise` instance and
 > resource collector for every loader added.
 
@@ -193,7 +193,7 @@ Using the global parameters in configuration:
 
 ```yaml
 app:
-    cache_dir: %app_dir%/cache
+    cache_dir: "%app_dir%/cache"
 ```
 
 Retrieving the configuration:

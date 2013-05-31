@@ -2,6 +2,8 @@
 
 namespace Herrera\Wise;
 
+use ArrayAccess;
+use Herrera\Wise\Exception\InvalidArgumentException;
 use Herrera\Wise\Exception\LoaderException;
 use Herrera\Wise\Exception\LogicException;
 use Herrera\Wise\Exception\ProcessorException;
@@ -278,10 +280,18 @@ class Wise
     /**
      * Sets a list of global parameters.
      *
-     * @param array $parameters The parameters.
+     * @param array|ArrayAccess $parameters The parameters.
+     *
+     * @throws InvalidArgumentException If $parameters is invalid.
      */
-    public function setGlobalParameters(array $parameters)
+    public function setGlobalParameters($parameters)
     {
+        if (!is_array($parameters) && !($parameters instanceof ArrayAccess)) {
+            throw new InvalidArgumentException(
+                'The $parameters argument must be an array or array accessible object.'
+            );
+        }
+
         $this->parameters = $parameters;
     }
 

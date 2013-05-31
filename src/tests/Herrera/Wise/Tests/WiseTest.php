@@ -363,6 +363,16 @@ PHP
         );
     }
 
+    public function testSetGlobalParametersInvalid()
+    {
+        $this->setExpectedException(
+            'Herrera\\Wise\\Exception\\InvalidArgumentException',
+            'The $parameters argument must be an array or array accessible object.'
+        );
+
+        $this->wise->setGlobalParameters(true);
+    }
+
     /**
      * @depends testGetLoader
      */

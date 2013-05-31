@@ -2,6 +2,7 @@
 
 namespace Herrera\Wise\Loader;
 
+use ArrayAccess;
 use Herrera\Wise\Exception\ImportException;
 use Herrera\Wise\Exception\InvalidReferenceException;
 use Herrera\Wise\Resource\ResourceAwareInterface;
@@ -163,18 +164,19 @@ abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInt
     /**
      * Resolves the reference and returns its value.
      *
-     * @param string $reference A reference.
-     * @param array  $values    A list of values.
+     * @param string            $reference A reference.
+     * @param array|ArrayAccess $values    A list of values.
      *
      * @return mixed The referenced value.
      *
      * @throws InvalidReferenceException If the reference is not valid.
      */
-    public function resolveReference($reference, array $values)
+    public function resolveReference($reference, $values)
     {
         foreach (explode('.', $reference) as $leaf) {
-            if ((false === is_array($values))
-                || (false === array_key_exists($leaf, $values))) {
+            if ((!is_array($values) && !($values instanceof ArrayAccess))
+                || (is_array($values) && !array_key_exists($leaf, $values))
+                || (($values instanceof ArrayAccess) && !$values->offsetExists($leaf))) {
                 throw InvalidReferenceException::format(
                     'The reference "%s" could not be resolved (failed at "%s").',
                     "%$reference%",

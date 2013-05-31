@@ -2,6 +2,7 @@
 
 namespace Herrera\Wise\Tests\Loader;
 
+use ArrayObject;
 use Herrera\PHPUnit\TestCase;
 use Herrera\Wise\Loader\AbstractFileLoader;
 use Herrera\Wise\Resource\ResourceCollector;
@@ -206,20 +207,26 @@ class AbstractFileLoaderTest extends TestCase
 
     public function testResolveReference()
     {
-        $this->assertEquals(
-            123,
-            $this->loader->resolveReference(
-                'a.b.c.d',
-                array(
-                    'a' => array(
-                        'b' => array(
-                            'c' => array(
-                                'd' => 123
-                            )
-                        )
+        $array = array(
+            'a' => array(
+                'b' => array(
+                    'c' => array(
+                        'd' => 123
                     )
                 )
             )
+        );
+
+        $object = new ArrayObject($array);
+
+        $this->assertEquals(
+            123,
+            $this->loader->resolveReference('a.b.c.d', $array)
+        );
+
+        $this->assertEquals(
+            123,
+            $this->loader->resolveReference('a.b.c.d', $object)
         );
     }
 

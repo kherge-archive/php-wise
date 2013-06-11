@@ -19,20 +19,13 @@ class DelegatingProcessor extends AbstractProcessor
     private $last;
 
     /**
-     * The processor resolver.
-     *
-     * @var ProcessorResolverInterface
-     */
-    private $resolver;
-
-    /**
      * Sets the processor resolver.
      *
      * @param ProcessorResolverInterface $resolver The resolver.
      */
     public function __construct(ProcessorResolverInterface $resolver)
     {
-        $this->resolver = $resolver;
+        $this->setResolver($resolver);
     }
 
     /**
@@ -56,7 +49,7 @@ class DelegatingProcessor extends AbstractProcessor
      */
     public function supports($resource, $type = null)
     {
-        $this->last = $this->resolver->resolve($resource, $type) ?: null;
+        $this->last = $this->getResolver()->resolve($resource, $type) ?: null;
 
         return (null !== $this->last);
     }

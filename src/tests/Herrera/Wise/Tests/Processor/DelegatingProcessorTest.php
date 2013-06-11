@@ -18,6 +18,11 @@ class DelegatingProcessorTest extends TestCase
         $this->assertNotNull(
             $this->getPropertyValue($this->processor, 'resolver')
         );
+
+        $this->assertSame(
+            $this->processor->getResolver(),
+            $this->getPropertyValue($this->processor, 'resolver')
+        );
     }
 
     /**

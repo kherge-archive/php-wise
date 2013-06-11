@@ -3,11 +3,13 @@
 namespace Herrera\Wise\Tests;
 
 use Herrera\PHPUnit\TestCase;
+use Herrera\Wise\Loader\LoaderResolver;
 use Herrera\Wise\Loader\PhpFileLoader;
 use Herrera\Wise\Resource\ResourceCollector;
 use Herrera\Wise\Tests\Processor\TestProcessor;
 use Herrera\Wise\Wise;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\Config\Loader\DelegatingLoader;
 
 class WiseTest extends TestCase
 {
@@ -391,6 +393,19 @@ PHP
             $this->wise,
             $this->loader->getWise()
         );
+    }
+
+    public function setSetLoaderDelegator()
+    {
+        $this->setPropertyValue($this->wise, 'collector', $this->collector);
+
+        $resolver = new LoaderResolver();
+        $loader = new DelegatingLoader($resolver);
+
+        $this->wise->setLoader($loader);
+
+        $this->assertSame($this->collector, $resolver->getResourceCollector());
+        $this->assertSame($this->wise, $resolver->getWise());
     }
 
     /**

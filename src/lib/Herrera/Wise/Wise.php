@@ -311,6 +311,19 @@ class Wise
         if ($loader instanceof WiseAwareInterface) {
             $loader->setWise($this);
         }
+
+        if ($loader instanceof DelegatingLoader) {
+            $resolver = $loader->getResolver();
+
+            if ($this->collector && ($resolver instanceof ResourceAwareInterface)) {
+                $resolver->setResourceCollector($this->collector);
+            }
+
+            if ($resolver instanceof WiseAwareInterface) {
+                $resolver->setWise($this);
+            }
+
+        }
     }
 
     /**

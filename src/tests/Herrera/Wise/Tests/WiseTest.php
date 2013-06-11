@@ -352,6 +352,18 @@ PHP
         );
     }
 
+    public function testSetCollectorDelegator()
+    {
+        $resolver = new LoaderResolver();
+        $loader = new DelegatingLoader($resolver);
+
+        $this->setPropertyValue($this->wise, 'loader', $loader);
+
+        $this->wise->setCollector($this->collector);
+
+        $this->assertSame($this->collector, $resolver->getResourceCollector());
+    }
+
     /**
      * @depends testGetGlobalParameters
      */

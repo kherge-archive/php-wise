@@ -271,9 +271,18 @@ class Wise
     {
         $this->collector = $collector;
 
-        if ($this->loader
-            && ($this->loader instanceof ResourceAwareInterface)) {
-            $this->loader->setResourceCollector($collector);
+        if ($this->loader) {
+            if ($this->loader instanceof ResourceAwareInterface) {
+                $this->loader->setResourceCollector($collector);
+            }
+
+            if ($this->loader instanceof DelegatingLoader) {
+                $resolver = $this->loader->getResolver();
+
+                if ($resolver instanceof ResourceAwareInterface) {
+                    $resolver->setResourceCollector($collector);
+                }
+            }
         }
     }
 

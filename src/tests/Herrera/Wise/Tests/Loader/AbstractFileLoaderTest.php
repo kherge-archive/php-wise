@@ -64,6 +64,11 @@ class AbstractFileLoaderTest extends TestCase
         );
     }
 
+    public function testProcessEmpty()
+    {
+        $this->assertSame(array(), $this->loader->process(null, 'test.file'));
+    }
+
     /**
      * @expectedException \Herrera\Wise\Exception\ImportException
      * @expectedExceptionMessage The "imports" value is not valid in "test.file".

@@ -76,8 +76,12 @@ abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInt
      * @throws ImportException           If "imports" is invalid.
      * @throws InvalidReferenceException If an invalid reference is used.
      */
-    public function process(array $data, $file)
+    public function process($data, $file)
     {
+        if (empty($data)) {
+            return array();
+        }
+
         if (isset($data['imports'])) {
             if (false === is_array($data['imports'])) {
                 throw ImportException::format(

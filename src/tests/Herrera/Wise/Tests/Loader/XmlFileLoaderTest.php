@@ -55,6 +55,9 @@ DATA
 
         $this->assertSame(
             array(
+                'imported' => array(
+                    'value' => 'imported value'
+                ),
                 'imports' => array(
                     array('resource' => 'import.xml')
                 ),
@@ -64,9 +67,6 @@ DATA
                     'enabled' => true,
                     'unit' => 1.23
                 ),
-                'imported' => array(
-                    'value' => 'imported value'
-                )
             ),
             $this->loader->load('test.xml')
         );

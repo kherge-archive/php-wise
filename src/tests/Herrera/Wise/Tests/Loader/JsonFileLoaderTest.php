@@ -54,6 +54,9 @@ DATA
 
         $this->assertSame(
             array(
+                'imported' => array(
+                    'value' => 'imported value'
+                ),
                 'imports' => array(
                     array('resource' => 'import.json')
                 ),
@@ -61,9 +64,6 @@ DATA
                     'number' => 123,
                     'imported' => 'imported value'
                 ),
-                'imported' => array(
-                    'value' => 'imported value'
-                )
             ),
             $this->loader->load('test.json')
         );

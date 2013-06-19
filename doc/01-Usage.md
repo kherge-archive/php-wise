@@ -1,223 +1,202 @@
 Usage
 =====
 
-To use Wise in your project, you will need to create an instance of the `Wise`
-class. There are two methods of creating the instance: [simple](#Simple) and
-[advanced](#Advanced).
+> **Notice:** The documentat was designed to be read from top to bottom. Some
+> tasks are shared with other topics. For example, the `$locator` instance
+> in **Single Loader** topic is needed in the **Multiple Loader** topic, but
+> it is not covered again on how to create it.
 
-- [Setup](#setup)
-    - [Simple](#simple)
-    - [Advanced](#advanced)
-        - [Creating an Instance](#creating-an-instance)
-            - [Enable Caching](#enable-caching)
-        - [Set the Loader](#set-theloader)
-            - [Using Multiple Loaders](#using-multiple-loaders)
-- [Global Parameters](#globals)
-- [Processing Configuration](#processing-configuration)
-    - [Creating a Processor](#creating-a-processor)
-    - [Using Multiple Processors](#using-multiple-processors)
-- [Loading Data](#loading-data)
+- [All-In-One](#all-in-one)
+- [Cherry Pick](#cherry-pick)
+    - [Single Loader](#single-loader)
+    - [Multiple Loaders](#multiple-loaders)
+    - [Caching](#caching)
 
-Setup
------
+There are two ways of using Wise.
 
-### Simple
+All-In-One
+----------
 
-The simplest way of instantiating Wise is to use its factory method:
+The easiest way to start using Wise is by calling the `create()` method:
 
 ```php
-// simple
-$wise = Herrera\Wise\Wise::create('/path/to/config/dir');
+use Herrera\Wise\Wise;
 
-// multiple directories
-$wise = Herrera\Wise\Wise::create(
+$wise = Wise::create('/path/to/config');
+```
+
+Using this approach requires that you install all of Wise's suggested Composer
+dependencies, but grants you the ability to load INI, JSON, PHP, XML, and YAML
+configuration files.
+
+The `create()` method will accept a single directory path, or an array of
+directory paths. You may also specify a cache directory path, and the debug
+mode, if necessary:
+
+```php
+$wise = Wise::create(
+    array(                // multiple directory paths
+        '/path/1',
+        '/path/2',
+        '/path/3',
+        '/path/4',
+    ),
+    '/path/to/cache/dir', // cache directory path
+    true                  // enables debugging
+);
+```
+
+Cherry Pick
+-----------
+
+Your project may not make use of one or more configuration file types, so
+registering all of the available loaders may be wasteful. Instead of using
+the `create()` method, you will want to create a new instance of `Wise`:
+
+```php
+$wise = new Wise();
+```
+
+### Single Loader
+
+If you are using only one file type for your project, setting up a loader
+is fairly straightforward. First, you will need to create a `FileLocator`
+instance, which is used by all loaders to find configuration files:
+
+```php
+use Symfony\Component\Config\FileLocator;
+
+$locator = new FileLocator('/path/to/config');
+```
+
+If your configuration files are located in multiple directories, you may
+provide an array of directory paths.
+
+> You might be scratching your head and wondering why you are creating an
+> instance of a class from a different library. The Wise library is built on
+> top of Symfony's Config library, which shares many of the same classes
+> with Wise.
+
+Once you have created your locator, you can now instantiate your desired
+loader with the new `FileLocator` object, which will then be registered
+with `$wise`:
+
+```php
+use Herrera\Wise\Loader\PhpFileLoader;
+
+$loader = new PhpFileLoader($locator);
+
+$wise->setLoader($loader);
+```
+
+The example demonstrates how to support only PHP scripts as configuration
+files. You may also use any of the loaders that have been bundled with the
+library:
+
+- `Herrera\Wise\Loader\IniFileLoader`
+- `Herrera\Wise\Loader\JsonFileLoader` &mdash; Requires `herrera-io/json`.
+- `Herrera\Wise\Loader\PhpFileLoader`
+- `Herrera\Wise\Loader\XmlFileLoader` &mdash; Requires the `dom` extension.
+- `Herrera\Wise\Loader\YamlFileLoader` &mdash; Requires `symfony/yaml`.
+
+You may also [create your own loader][] and use that instead.
+
+### Multiple Loaders
+
+To support multiple loaders, you do not need to create multiple instances of
+Wise. Instead, you may use a delegating loader. This delegating loader will
+manage requests for configuration files, and will execute the appropriate
+loader that was registered with the delegating loader. To use a delegating
+loader, you must first create a resolver, which is used to find the loader
+needed:
+
+```php
+use Herrera\Wise\Loader\LoaderResolver;
+use Herrera\Wise\Loader\IniFileLoader;
+use Herrera\Wise\Loader\PhpFileLoader;
+
+$resolver = new LoaderResolver(
     array(
-        '/path/to/config/dir',
-        '/path/to/config/dir',
-        '/path/to/config/dir',
+        new IniFileLoader($locator),
+        new PhpFileLoader($locator),
     )
 );
-
-// with caching enabled
-$wise = Herrera\Wise\Wise::create(
-    '/path/to/config/dir',
-    '/path/to/cache/dir'
-);
-
-// with debugging enabled
-$wise = Herrera\Wise\Wise::create(
-    '/path/to/config/dir',
-    '/path/to/cache/dir',
-    true
-);
 ```
 
-### Advanced
+The example demonstrates how to support INI and PHP files, but you may provide
+any loader you need. Like the **Single Loader** section described, you may also
+use your own custom loader.
 
-The advanced way of instantiating Wise will give you far greater control, but
-can be a little bit more tedious. A good understanding of the Symfony [Config][]
-component will be very helpful.
+#### Caching
 
-#### Creating an Instance
-
-First, you will need to create an instance of the `Wise` class:
-
-```php
-// no debugging
-$wise = new Herrera\Wise\Wise();
-
-// with debugging
-$wise = new Herrera\Wise\Wise(true);
-```
-
-> By enabling debugging, the cache will be automatically refreshed if the
-> configuration resource (or its imports) changes. If debugging is disabled,
-> cache files will never be updated and must be deleted if the configuration
-> resource changes.
-
-##### Enable Caching
-
-To enable caching, you must set the cache directory path and the resource
-collector:
+Now that you have registered your loader(s), you may want to cache the result
+to improve performance. To do so, you must register a resource collector, and
+then set the cache directory path:
 
 ```php
+use Herrera\Wise\Resource\ResourceCollector;
+
 $wise->setCacheDir('/path/to/cache/dir');
-$wise->setCollector(new Herrera\Wise\Resource\ResourceCollector());
+$wise->setCollector(new ResourceCollector());
 ```
 
-> The resource collector is used to track imported configuration resources.
-> This allows for proper cache refreshing when debugging is enabled. Otherwise,
-> the cache will not be refreshed if one of the imported resources changes.
+> The purpose of the `ResourceCollector` instance is so that `imports` can be
+> properly tracked when they are loaded. Without the resource collector, any
+> changes made to imported files will not be considered when the cache needs
+> to be refreshed, resulting in stale cache data.
 
-#### Set the Loader
+Processing
+----------
 
-Wise comes bundled with its own collection of file loaders.
+Regardless of whether you chose the **Single Loader** or **Multiple Loaders**
+approach, you may want to normalize and/or validate the configuration data that
+you are loading. In Wise, this is called processing. For this part, **you must
+known** how to create your own definitions, which is covered by Symfony's
+own [documentation][]. You must have a solid understanding of that
+documentation before you will be able to proceed.
 
-- `Herrera\Loader\Wise\IniFileLoader`
-- `Herrera\Loader\Wise\JsonFileLoader`
-- `Herrera\Loader\Wise\PhpFileLoader`
-- `Herrera\Loader\Wise\XmlFileLoader`
-- `Herrera\Loader\Wise\YamlFileLoader`
+*intermission, Jeopardy theme song*
 
-> To use your own loader, please see [How to Create a Loader][].
+You should now continue on to [How to Create a Processor][].
 
-To use one of the loaders, you will first need to create a file locator:
+Loading Data
+------------
+
+After you have set up Wise, you may now load your configuration files:
 
 ```php
-// single path
-$locator = new Symfony\Component\Config\FileLocator('/path/to/config/dir');
-
-// multiple paths
-$locator = new Symfony\Component\Config\FileLocator(
-    array(
-        '/path/to/config/dir',
-        '/path/to/config/dir',
-        '/path/to/config/dir',
-    )
-);
+$config = $wise->load('config.ini');
 ```
 
-You may then register the desired loader with `Wise`:
+If you want a flattened version of your configuration data, delimited by ".",
+you may instead use the `loadFlat()` method:
 
 ```php
-$wise->setLoader(new Herrera\Loader\Wise\IniFileLoader($locator));
+$flatConfig = $wise->loadFlat('config.ini');
 ```
 
-##### Using Multiple Loaders
-
-To use more than one loader, you will need to use both a delegating loader and
-a loader resolver. The delegating loader will use the loader resolver to find
-the correct loader to use:
+This will turn this data:
 
 ```php
-$resolver = new Herrera\Wise\Loader\LoaderResolver();
-$resolver->setResourceCollector($wise->getCollector());
-$resolver->setWise($wise);
-
-$wise->setLoader(
-    new Symfony\Component\Config\Loader\DelegatingLoader($resolver)
-);
-```
-
-> You may use the `Symfony\Component\Config\Loader\LoaderResolver` class, but
-> you may lose support for caching and global parameters. The `LoaderResolver`
-> class included with Wise will automatically set the `Wise` instance and
-> resource collector for every loader added.
-
-With the resolver registered with `Wise`, you can then add all the loaders you
-need using the resolver's `addLoader()` method:
-
-```php
-$resolver->addLoader(new Herrera\Wise\Loader\IniFileLoader($locator));
-$resolver->addLoader(new Herrera\Wise\Loader\JsonFileLoader($locator));
-$resolver->addLoader(new Herrera\Wise\Loader\YamlFileLoader($locator));
-// ... snip ...
-```
-
-> You can add your own custom loaders as well.
-
-# Global Parameters
-
-Global parameters are used by the configuration resource you load to expand
-on its own configuration. This is useful for when you have need to specify
-data such as a file path. To define a list of global parameters, you will need
-to call the `setGlobalsParameters()` method:
-
-```php
-$wise->setGlobalParameters(
-    array(
-        'global' => array(
-            'param' => 'My global parameters.'
+array(
+    'one' => array(
+        'two' => array(
+            'three' => 123
         )
-    )
-);
+    ),
+    'two' => 2
+)
 ```
 
-> The global parameters are not merged into every configuration data source
-> you load. You may use the `getGlobalParameters()` method to retrieve the
-> set global parameters.
-
-## Example Use of Global Parameters
-
-Setting the global parameters:
+into:
 
 ```php
-$wise->setGlobalParameters(
-    array(
-        'app_dir' => '/path/to/app',
-    )
-);
+array(
+    'one.two.three' => 123,
+    'two' => 2
+)
 ```
 
-Using the global parameters in configuration:
-
-```yaml
-app:
-    cache_dir: "%app_dir%/cache"
-```
-
-Retrieving the configuration:
-
-```php
-$config = $wise->loadFlat('example.yml');
-
-echo $config['app.cache_dir']; // "/path/to/app/cache"
-```
-
-# Processing Configuration
-
-To normalize and validate your configuration data, you will need to see the
-documentation on [How to Create a Processor][].
-
-# Loading Data
-
-To load your configuration data, simply call the `load()` method:
-
-```php
-$config = $wise->load('example.ini');
-```
-
-[Config]: http://symfony.com/doc/current/components/config/index.html
-[configuration definition]: http://symfony.com/doc/current/components/config/definition.html
-[How to Create a Loader]: 02-HowToCreateALoader.md
+[create your own loader]: 02-HowToCreateALoader.md
+[documentation]: http://symfony.com/doc/current/components/config/definition.html
 [How to Create a Processor]: 03-HowToCreateAProcessor.md

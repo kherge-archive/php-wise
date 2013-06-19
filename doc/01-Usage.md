@@ -1,16 +1,18 @@
 Usage
 =====
 
-> **Notice:** The documentat was designed to be read from top to bottom. Some
-> tasks are shared with other topics. For example, the `$locator` instance
-> in **Single Loader** topic is needed in the **Multiple Loader** topic, but
-> it is not covered again on how to create it.
+> **Notice:** The documentation was designed to be read from top to bottom.
+> Some > tasks are shared with other topics. For example, the `$locator`
+> instance > in the **Single Loader** topic is needed in the **Multiple Loader**
+> topic, but the process of creating it is not covered again.
 
 - [All-In-One](#all-in-one)
 - [Cherry Pick](#cherry-pick)
     - [Single Loader](#single-loader)
     - [Multiple Loaders](#multiple-loaders)
     - [Caching](#caching)
+- [Processing](#processing)
+- [Loading Data](#loading-data)
 
 There are two ways of using Wise.
 
@@ -89,7 +91,7 @@ $loader = new PhpFileLoader($locator);
 $wise->setLoader($loader);
 ```
 
-The example demonstrates how to support only PHP scripts as configuration
+This example demonstrates how to support only PHP scripts as configuration
 files. You may also use any of the loaders that have been bundled with the
 library:
 
@@ -103,12 +105,10 @@ You may also [create your own loader][] and use that instead.
 
 ### Multiple Loaders
 
-To support multiple loaders, you do not need to create multiple instances of
-Wise. Instead, you may use a delegating loader. This delegating loader will
-manage requests for configuration files, and will execute the appropriate
-loader that was registered with the delegating loader. To use a delegating
-loader, you must first create a resolver, which is used to find the loader
-needed:
+To use multiple loaders, you do not need to create multiple instances of Wise.
+Instead, what you will need is a delegating loader. This delegating loader is
+used in place of an actual loader. To use a delegating loader, you must first
+create its resolver:
 
 ```php
 use Herrera\Wise\Loader\LoaderResolver;
@@ -123,9 +123,19 @@ $resolver = new LoaderResolver(
 );
 ```
 
-The example demonstrates how to support INI and PHP files, but you may provide
-any loader you need. Like the **Single Loader** section described, you may also
-use your own custom loader.
+In this example, the INI and PHP file loaders have been registered with the
+resolver. This will allow the delegating loader to use the INI and PHP loaders
+when an attempt is made to load either file type. Before that can be done, you
+must create the delegating loader using your resolver, and then registering
+the loader with Wise:
+
+```php
+use Herrera\Wise\Loader\DelegatingLoader;
+
+$delegator = new DelegatingLoader($resolver);
+
+$wise->setLoader($delegator);
+```
 
 #### Caching
 

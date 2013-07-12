@@ -145,14 +145,16 @@ abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInt
                             $ref = $_this->resolveReference($reference, $global);
                         }
 
-                        if (false === is_scalar($ref)) {
-                            if (false == preg_match('/^%(?:[^%]+)%$/', $value)) {
-                                throw InvalidReferenceException::format(
-                                    'The non-scalar reference "%s" cannot be used inline.',
-                                    "%$reference%"
-                                );
-                            }
+                        if ((false === is_null($ref))
+                            && (false === is_scalar($ref))
+                            && (false == preg_match('/^%(?:[^%]+)%$/', $value))) {
+                            throw InvalidReferenceException::format(
+                                'The non-scalar reference "%s" cannot be used inline.',
+                                "%$reference%"
+                            );
+                        }
 
+                        if ("%$reference%" === $value) {
                             $value = $ref;
                         } else {
                             $value = str_replace("%$reference%", $ref, $value);

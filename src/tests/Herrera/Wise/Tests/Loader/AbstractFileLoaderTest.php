@@ -124,7 +124,7 @@ class AbstractFileLoaderTest extends TestCase
                     ),
                     'global' => '%global.value%',
                     'placeholder' => '%imported.list%',
-                    'inline_placeholder' => 'rand: %imported.value%'
+                    'inline_placeholder' => 'rand: %imported.list.null%%imported.value%'
                 ),
                 true
             ) . ';'
@@ -136,6 +136,7 @@ class AbstractFileLoaderTest extends TestCase
                 array(
                     'imported' => array(
                         'list' => array(
+                            'null' => null,
                             'value' => 123
                         ),
                         'value' => $rand = rand()
@@ -154,11 +155,13 @@ class AbstractFileLoaderTest extends TestCase
                 ),
                 'global' => 999,
                 'placeholder' => array(
+                    'null' => null,
                     'value' => 123
                 ),
                 'inline_placeholder' => 'rand: ' . $rand,
                 'imported' => array(
                     'list' => array(
+                        'null' => null,
                         'value' => 123
                     ),
                     'value' => $rand

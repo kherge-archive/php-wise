@@ -124,7 +124,8 @@ class AbstractFileLoaderTest extends TestCase
                     ),
                     'global' => '%global.value%',
                     'placeholder' => '%imported.list%',
-                    'inline_placeholder' => 'rand: %imported.list.null%%imported.value%'
+                    'inline_placeholder' => 'rand: %imported.list.null%%imported.value%',
+                    '%imported.key%' => 'a value'
                 ),
                 true
             ) . ';'
@@ -135,6 +136,7 @@ class AbstractFileLoaderTest extends TestCase
             '<?php return ' . var_export(
                 array(
                     'imported' => array(
+                        'key' => 'replaced_key',
                         'list' => array(
                             'null' => null,
                             'value' => 123
@@ -159,7 +161,9 @@ class AbstractFileLoaderTest extends TestCase
                     'value' => 123
                 ),
                 'inline_placeholder' => 'rand: ' . $rand,
+                'replaced_key' => 'a value',
                 'imported' => array(
+                    'key' => 'replaced_key',
                     'list' => array(
                         'null' => null,
                         'value' => 123

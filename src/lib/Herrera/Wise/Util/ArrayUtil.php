@@ -37,4 +37,22 @@ class ArrayUtil
 
         return $flat;
     }
+
+    /**
+     * Similar to `array_walk_recursive()`, but passes the current array too.
+     *
+     * @param array    &$array   An array.
+     * @param callable $callback The callable.
+     * @param mixed    $data     The user data.
+     */
+    public static function walkRecursive(&$array, $callback, $data = null)
+    {
+        foreach ($array as $key => &$value) {
+            if (is_array($value)) {
+                self::walkRecursive($value, $callback, $data);
+            } else {
+                $callback($value, $key, $array, $data);
+            }
+        }
+    }
 }

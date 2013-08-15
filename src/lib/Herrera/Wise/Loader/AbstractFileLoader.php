@@ -7,6 +7,7 @@ use Herrera\Wise\Exception\ImportException;
 use Herrera\Wise\Exception\InvalidReferenceException;
 use Herrera\Wise\Resource\ResourceAwareInterface;
 use Herrera\Wise\Resource\ResourceCollectorInterface;
+use Herrera\Wise\Util\ArrayUtil;
 use Herrera\Wise\Wise;
 use Herrera\Wise\WiseAwareInterface;
 use Symfony\Component\Config\Loader\FileLoader;
@@ -175,17 +176,17 @@ abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInt
         $global = $this->wise ? $this->wise->getGlobalParameters() : array();
         $_this = $this;
 
-        array_walk_recursive(
+        ArrayUtil::walkRecursive(
             $data,
-            function (&$value, $key) use (&$data, $global, $_this) {
+            function (&$value, $key, &$array) use (&$data, $global, $_this) {
                 $value = $_this->doReplace($value, $data, $global);
 
                 if (false !== strpos($key, '%')) {
-                    unset($data[$key]);
+                    unset($array[$key]);
 
                     $key = $_this->doReplace($key, $data, $global);
 
-                    $data[$key] = $value;
+                    $array[$key] = $value;
                 }
             }
         );

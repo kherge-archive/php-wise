@@ -28,4 +28,38 @@ class ArrayUtilTest extends TestCase
             )
         );
     }
+
+    public function testWalkRecursive()
+    {
+        $expected = $actual = array(
+            'one' => array(
+                'two' => array(
+                    'three' => array(
+                        'four' => 'eight',
+                        'twelve' => 'thirteen',
+                    ),
+                    'five' => 'nine',
+                ),
+                'six' => 'ten',
+            ),
+            'seven' => 'eleven',
+        );
+
+        ArrayUtil::walkRecursive(
+            $actual,
+            function (&$value, $key, &$array) {
+                if ('four' === $key) {
+                    unset($array[$key]);
+
+                    $array['changed'] = $value;
+                }
+            }
+        );
+
+        unset($expected['one']['two']['three']['four']);
+
+        $expected['one']['two']['three']['changed'] = 'eight';
+
+        $this->assertSame($expected, $actual);
+    }
 }

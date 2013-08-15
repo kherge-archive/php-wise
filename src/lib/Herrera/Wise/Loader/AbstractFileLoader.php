@@ -34,6 +34,57 @@ abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInt
     private $wise;
 
     /**
+     * Replace the placeholder value(s).
+     *
+     * @param mixed $input  The input.
+     * @param array $data   The data the input is from.
+     * @param array $global The global values.
+     *
+     * @return mixed The result.
+     *
+     * @throws InvalidReferenceException If an invalid reference is used.
+     */
+    public function doReplace($input, $data, $global)
+    {
+        preg_match_all(
+            '/%(?P<reference>[^%]+)%/',
+            $input,
+            $matches
+        );
+
+        if (false === empty($matches['reference'])) {
+            foreach ($matches['reference'] as $reference) {
+                try {
+                    $ref = $this->resolveReference($reference, $data);
+                } catch (InvalidReferenceException $exception) {
+                    if (empty($global)) {
+                        throw $exception;
+                    }
+
+                    $ref = $this->resolveReference($reference, $global);
+                }
+
+                if ((false === is_null($ref))
+                    && (false === is_scalar($ref))
+                    && (false == preg_match('/^%(?:[^%]+)%$/', $input))) {
+                    throw InvalidReferenceException::format(
+                        'The non-scalar reference "%s" cannot be used inline.',
+                        "%$reference%"
+                    );
+                }
+
+                if ("%$reference%" === $input) {
+                    $input = $ref;
+                } else {
+                    $input = str_replace("%$reference%", $ref, $input);
+                }
+            }
+        }
+
+        return $input;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getResourceCollector()
@@ -195,55 +246,4 @@ abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInt
      * @return array The parsed data.
      */
     abstract protected function doLoad($file);
-
-    /**
-     * Replaced the placeholder value(s).
-     *
-     * @param mixed $input  The input.
-     * @param array $data   The data the input is from.
-     * @param array $global The global values.
-     *
-     * @return mixed The result.
-     *
-     * @throws InvalidReferenceException If an invalid reference is used.
-     */
-    protected function doReplace($input, $data, $global)
-    {
-        preg_match_all(
-            '/%(?P<reference>[^%]+)%/',
-            $input,
-            $matches
-        );
-
-        if (false === empty($matches['reference'])) {
-            foreach ($matches['reference'] as $reference) {
-                try {
-                    $ref = $this->resolveReference($reference, $data);
-                } catch (InvalidReferenceException $exception) {
-                    if (empty($global)) {
-                        throw $exception;
-                    }
-
-                    $ref = $this->resolveReference($reference, $global);
-                }
-
-                if ((false === is_null($ref))
-                    && (false === is_scalar($ref))
-                    && (false == preg_match('/^%(?:[^%]+)%$/', $input))) {
-                    throw InvalidReferenceException::format(
-                        'The non-scalar reference "%s" cannot be used inline.',
-                        "%$reference%"
-                    );
-                }
-
-                if ("%$reference%" === $input) {
-                    $input = $ref;
-                } else {
-                    $input = str_replace("%$reference%", $ref, $input);
-                }
-            }
-        }
-
-        return $input;
-    }
 }

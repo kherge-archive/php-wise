@@ -27,7 +27,7 @@ class YamlFileLoader extends AbstractFileLoader
     protected function doLoad($file)
     {
         if (!file_exists($file) || !is_readable($file)) {
-            throw new \InvalidArgumentException(sprintf('Unable to read file: %s', $file);
+            throw new \InvalidArgumentException(sprintf('Unable to read file: %s', $file));
         }
         return Parser::parse(file_get_contents($file));
     }

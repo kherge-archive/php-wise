@@ -12,6 +12,11 @@ $wise = Herrera\Wise\Wise::create('/path/to/config');
 $data = $wise->load('example.yml');
 ```
 
+Forks
+-----
+
+As this project is no longer maintained, please see the [Wiki page for maintained forks](https://github.com/kherge-abandoned/php-wise/wiki/Forks).
+
 Documentation
 -------------
 

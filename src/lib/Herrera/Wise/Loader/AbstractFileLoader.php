@@ -162,14 +162,16 @@ abstract class AbstractFileLoader extends FileLoader implements ResourceAwareInt
 
                 $this->setCurrentDir($dir);
 
-                $data = array_replace_recursive(
-                    $this->import(
-                        $import['resource'],
-                        null,
-                        isset($import['ignore_errors']) ? (bool) $import['ignore_errors'] : false
-                    ),
-                    $data
-                );
+                if ($imported = $this->import(
+                    $import['resource'],
+                    null,
+                    isset($import['ignore_errors']) ? (bool) $import['ignore_errors'] : false
+                )) {
+                    $data = array_replace_recursive(
+                        is_array($imported) ? $imported : array(),
+                        $data
+                    );
+                };
             }
         }
 

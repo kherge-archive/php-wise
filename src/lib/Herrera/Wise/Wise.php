@@ -212,6 +212,10 @@ class Wise
             );
 
             if ($cache->isFresh()) {
+                if (method_exists($cache, 'getPath')) {
+                    /** @noinspection PhpIncludeInspection */
+                    return require $cache->getPath();
+                }
                 /** @noinspection PhpIncludeInspection */
                 return require $cache;
             }
